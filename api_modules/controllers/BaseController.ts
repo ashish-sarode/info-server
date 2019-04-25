@@ -22,13 +22,24 @@ abstract class BaseController {
   insert = (req, res) => {
     const obj = new this.model(req.body);
     obj.save((err, item) => {
+
       // 11000 is the code for duplicate key error
       if (err && err.code === 11000) {
-        res.sendStatus(400);
+        return res.status(400).json({ error: true, sucess: false, data: { errors: { path:'email' , message: 'User is already registered' } } });
       }
       if (err) {
-        return console.error(err);
+
+        if (err.errors) {
+          let cstmErrors = {};
+          let errs = err.errors;
+          Object.keys(errs).forEach(function (key) {
+            cstmErrors[key] = { path: errs[key].path, message: errs[key].message };
+          });
+          return res.status(400).json({ error: true, sucess: false, data: { errors: cstmErrors } });
+        }
+        return res.status(400).json(err);
       }
+
       res.status(200).json(item);
     });
   }

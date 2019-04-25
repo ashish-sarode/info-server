@@ -22,6 +22,7 @@ if (process.env.ENV_MODE === 'test') {
 }
 
 mongoose.Promise = global.Promise;
+mongoose.set('useCreateIndex', true)
 mongoose.connect(mongodbURI, {useNewUrlParser: true})
     .then(db => {
         console.log('Connected to MongoDB');
