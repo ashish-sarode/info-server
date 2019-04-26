@@ -12,9 +12,7 @@ app.use('/', express.static(path.join(__dirname, '../public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-
-
-let mongodbURI;
+let mongodbURI:any;
 if (process.env.ENV_MODE === 'test') {
     mongodbURI = process.env.MONGODB_TEST_URI;
 } else {
@@ -23,7 +21,7 @@ if (process.env.ENV_MODE === 'test') {
 
 mongoose.Promise = global.Promise;
 mongoose.set('useCreateIndex', true)
-mongoose.connect(mongodbURI, {useNewUrlParser: true})
+mongoose.connect(mongodbURI, { useNewUrlParser: true })
     .then(db => {
         console.log('Connected to MongoDB');
         setRoutes(app);
