@@ -10,6 +10,7 @@ abstract class BaseController {
   getAll = (req, res) => {
     this.model.find({}, (err, docs) => {
       if (err) { return console.error(err); }
+      console.log(req.decoded.user);
       res.status(200).json(docs);
     });
   }

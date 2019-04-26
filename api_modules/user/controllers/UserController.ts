@@ -1,6 +1,5 @@
 import BaseController from '../../base/controllers/BaseController';
 import userModel from '../models/UserModel';
-import * as dotenv from 'dotenv';
 import * as jwt from 'jsonwebtoken';
 
 /**
