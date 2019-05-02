@@ -27,6 +27,6 @@
     "mongoose": "^5.5.3"
   },
   "bin": {
-    "aps-generate": "./src/dependencies/aps-mg.ts"
-  }  
+    "aps-generate": "./dependencies/aps-mg.ts"
+  }
 }
