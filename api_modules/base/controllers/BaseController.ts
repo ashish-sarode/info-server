@@ -1,6 +1,9 @@
+
+const mongooseErrorHandler = require('mongoose-error-handler');
 abstract class BaseController {
 
   abstract model: any;
+  public size = 10;
 
   /**
    * Function to get all records from the collection.
@@ -8,10 +11,17 @@ abstract class BaseController {
    * @memberof BaseController
    */
   getAll = (req, res) => {
-    this.model.find({}, (err, docs) => {
+    var filters = { skip: 0, limit: this.size };
+    var pageNo = ((parseInt(req.query.page) || 1) < 0) ? 1 : parseInt(req.query.page) ;
+console.log(pageNo);
+    this.size = parseInt(req.query.size) || this.size;
+    filters.skip = this.size * (pageNo - 1);
+    filters.limit = this.size;
+
+    this.model.find({}, {}, filters, (err, records) => {
       if (err) { return console.error(err); }
-      console.log(req.decoded.user);
-      res.status(200).json(docs);
+      //console.log(req.decoded.user);
+      res.status(200).json(records);
     });
   }
 
@@ -35,25 +45,19 @@ abstract class BaseController {
   insert = (req, res) => {
     const obj = new this.model(req.body);
     obj.save((err, item) => {
-
+      let data;
       // 11000 is the code for duplicate key error
       if (err && err.code === 11000) {
-        return res.status(400).json({ error: true, sucess: false, data: { errors: { path: 'email', message: 'User is already registered' } } });
+        console.log(err);
+        data = { errors: { unique: 'Record is already exists' } };
+        return res.status(400).json(this.filterResponse(false, 400, 'Record is already exists.', data));
       }
       if (err) {
-
-        if (err.errors) {
-          let cstmErrors = {};
-          let errs = err.errors;
-          Object.keys(errs).forEach(function (key) {
-            cstmErrors[key] = { path: errs[key].path, message: errs[key].message };
-          });
-          return res.status(400).json({ error: true, sucess: false, data: { errors: cstmErrors } });
-        }
-        return res.status(400).json(err);
+        console.log(err);
+        data = (err.name == 'ValidationError') ? mongooseErrorHandler.set(err) : err;
+        return res.status(400).json(this.filterResponse(false, 400, 'Validation error.', data));
       }
-
-      res.status(200).json(item);
+      return res.status(200).json(this.filterResponse(true, 200, 'Record inserted successfully!.', item));
     });
   }
 

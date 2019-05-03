@@ -24,7 +24,8 @@
     "bcrypt": "^3.0.6",
     "dotenv": "^7.0.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.5.3"
+    "mongoose": "^5.5.3",
+    "mongoose-error-handler": "^1.0.0"
   },
   "bin": {
     "aps-generate": "./dependencies/aps-mg.ts"
