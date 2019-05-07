@@ -11,18 +11,22 @@ abstract class BaseController {
    * @memberof BaseController
    */
   getAll = (req, res) => {
-    var filters = { skip: 0, limit: this.size };
-    var pageNo = ((parseInt(req.query.page) || 1) < 0) ? 1 : parseInt(req.query.page) ;
-console.log(pageNo);
-    this.size = parseInt(req.query.size) || this.size;
-    filters.skip = this.size * (pageNo - 1);
-    filters.limit = this.size;
+    try {
+      var filters = { skip: 0, limit: this.size };
+      var pageNo = ((parseInt(req.query.page) || 1) < 0) ? 1 : parseInt(req.query.page);
+      this.size = parseInt(req.query.limit) || this.size;
+      filters.skip = this.size * (pageNo - 1);
+      filters.limit = this.size;
 
-    this.model.find({}, {}, filters, (err, records) => {
-      if (err) { return console.error(err); }
-      //console.log(req.decoded.user);
-      res.status(200).json(records);
-    });
+      this.model.find({}, {}, filters, (err, records) => {
+        if (err) { return console.error(err); }
+        //console.log(req.decoded.user);
+        return res.status(200).json(this.filterResponse(true, 200, 'Records fetched successfully.', records));
+      });
+    } catch (ex) {
+      return res.status(500).json(this.filterResponse(false, 500, 'Something went wrong.', ex));
+    }
+
   }
 
   /**
@@ -55,7 +59,7 @@ console.log(pageNo);
       if (err) {
         console.log(err);
         data = (err.name == 'ValidationError') ? mongooseErrorHandler.set(err) : err;
-        return res.status(400).json(this.filterResponse(false, 400, 'Validation error.', data));
+        return res.status(400).json(this.filterResponse(false, 400, 'Something went wrong.', data));
       }
       return res.status(200).json(this.filterResponse(true, 200, 'Record inserted successfully!.', item));
     });
@@ -109,3 +113,5 @@ console.log(pageNo);
 }
 
 export default BaseController;
+//https://www.joyent.com/node-js/production/design/errors
+//https://expressjs.com/en/guide/error-handling.html
