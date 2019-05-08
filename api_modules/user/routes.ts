@@ -9,11 +9,12 @@ const middleware = new Middleware();
 
 /*User controller routes*/
 router.route('/login').post(user.login);
-router.route('/').get(middleware.checkToken, user.getAll);
 router.route('/count').get(user.count);
-router.route('/new').post(user.insert);
 router.route('/get/:id').get(user.get);
-router.route('/put/:id').put(user.update);
-router.route('/user/:id').delete(user.delete);
+
+router.route('/').post(middleware.checkToken, user.getAll);
+router.route('/new').post(middleware.checkToken, user.insert);
+router.route('/put/:id').put(middleware.checkToken, user.update);
+router.route('/user/:id').delete(middleware.checkToken, user.delete);
 
 export default router;

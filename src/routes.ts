@@ -10,9 +10,20 @@ import userRoutes from '../api_modules/user/routes';
 export default function setRoutes(app) {
     const router = express.Router();
 
-    router.use('/users', userRoutes);
     router.use('/', baseRoutes);
+    router.use('/users', userRoutes);    
 
-    app.use('/api/v1', router);
+    app.use('/api/v1', router, function (err, req, res, next) {
+        return res.status(err.code || 500).json({
+            status: {
+                isSuccessful: false,
+                code: err.code || 500,
+                message: err.info || 'Something went wrong.'
+            },
+            data: {
+                errors: err
+            }
+        });
+    });
 
 }
