@@ -21,11 +21,14 @@
     "string-template": "^1.0.0"
   },
   "dependencies": {
+    "app-root-path": "^2.2.1",
     "bcrypt": "^3.0.6",
+    "date-and-time": "^0.6.3",
     "dotenv": "^7.0.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.5.3",
-    "mongoose-error-handler": "^1.0.0"
+    "mongoose-error-handler": "^1.0.0",
+    "winston": "^3.2.1"
   },
   "bin": {
     "aps-generate": "./dependencies/aps-mg.ts"

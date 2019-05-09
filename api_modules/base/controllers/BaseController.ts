@@ -23,31 +23,21 @@ abstract class BaseController {
    */
   getAll = async (req, res, next) => {
     try {
-      var filters = { skip: 0, limit: this.size };
       var pageNo = ((!isNaN(req.body.page) && (parseInt(req.body.page) > 0)) ? parseInt(req.body.page) : 1);
-      this.searchFilter = req.body.searchFilter || {};
       this.size = parseInt(req.body.limit) || this.size;
-
-      var pagination = { currentPage: 1, totalPages: 1, recordsFound: 1 };
+      var filters = { skip: this.size * (pageNo - 1), limit: this.size };
       var totalRecords: any;
-
-      filters.skip = this.size * (pageNo - 1);
-      filters.limit = this.size;
-
-      totalRecords = await this.model.countDocuments(this.searchFilter, function (err, totalCount) {
+      totalRecords = await this.model.countDocuments(req.body.searchFilter || {}, function (err, totalCount) {
         if (err) { return next(err); }
         return totalCount;
       });
-      this.model.find(this.searchFilter, {}, filters, (err, records) => {
+      this.model.find(req.body.searchFilter || {}, {}, filters, (err, records) => {
         if (err) { return next(err); }
         //console.log(req.decoded.user);
-        pagination.currentPage = pageNo;
-        pagination.totalPages = Math.ceil(totalRecords / this.size);
-        pagination.recordsFound = totalRecords;
         if (records.length == 0) {
           return res.status(200).json(this.filterResponse(true, 200, 'No records found.', { records: records, pagination: {} }));
         }
-        return res.status(200).json(this.filterResponse(true, 200, 'Records fetched successfully.', { records: records, pagination: pagination }));
+        return res.status(200).json(this.filterResponse(true, 200, 'Records fetched successfully.', { records: records, pagination: { currentPage: pageNo, totalPages: Math.ceil(totalRecords / this.size), recordsFound: totalRecords } }));
       });
     } catch (ex) {
       return next(middleware.customErrorHandler(500, ex.name, 'Something went wrong.', ex.message));

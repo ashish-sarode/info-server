@@ -11,7 +11,7 @@ export default class Middleware {
      */
     checkToken = (req, res, next) => {
         try {
-            let token = req.headers['x-access-token'] || req.headers.authorization; // Express headers are auto converted to lowercase
+            var token = req.headers['x-access-token'] || req.headers.authorization; // Express headers are auto converted to lowercase
             if (token.startsWith('Bearer ')) {
                 token = token.slice(7, token.length);
             }
