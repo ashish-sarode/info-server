@@ -2,7 +2,7 @@ import * as express from 'express';
 import baseRoutes from '../api_modules/base/routes'
 import userRoutes from '../api_modules/user/routes';
 import logger from '../api_modules/middleware/logger'
-import date = require('date-and-time');
+import * as date from 'date-and-time';
 const currentDate = date.format(new Date(), 'YYYY-MM-DD HH:mm:ss');
 
 /**

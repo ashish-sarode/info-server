@@ -1,6 +1,6 @@
-const appRoot = require('app-root-path');
+import * as appRoot from 'app-root-path';
+import * as date from 'date-and-time';
 const winston = require('winston');
-const date = require('date-and-time');
 const currentDate = date.format(new Date(), 'YYYY-MM-DD');
 
 var options = {
