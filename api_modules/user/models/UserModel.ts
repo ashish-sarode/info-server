@@ -1,15 +1,17 @@
 import * as bcrypt from 'bcrypt';
 import * as mongoose from 'mongoose';
+import userRoleModel from './UserRoleModel';
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: [true, 'Please enter your name!'] },
   email: { type: String, unique: true, lowercase: true, trim: true, required: [true, 'Please enter your email!'] },
   password: { type: String, required: [true, 'Please enter your password!'] },
-  role: String
+  isActive: { type: Boolean, default: true },
+  role: { type: mongoose.Schema.Types.ObjectId, ref: 'userRoles', required : [true, 'Please assign role to user!']}
 });
 
 // Before saving the user, hash the password
-userSchema.pre('save', function (next) {
+userSchema.pre('save', function (req, res, next) {
   const user = this;
   if (!user.isModified('password')) { return next(); }
   bcrypt.genSalt(10, function (err, salt) {

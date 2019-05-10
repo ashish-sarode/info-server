@@ -1,0 +1,14 @@
+{
+    "dev": {
+        "driver": "mongodb",
+        "database": "info-server",
+        "host": "localhost"
+    },
+
+    "prod": {
+        "driver": "mongodb",
+        "database": "my_db",
+        "host": "localhost"
+    }
+  
+  }
