@@ -1,13 +1,13 @@
 import * as bcrypt from 'bcrypt';
 import * as mongoose from 'mongoose';
-import userRoleModel from './UserRoleModel';
+//import userRoleModel from './UserRoleModel';
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: [true, 'Please enter your name!'] },
   email: { type: String, unique: true, lowercase: true, trim: true, required: [true, 'Please enter your email!'] },
   password: { type: String, required: [true, 'Please enter your password!'] },
-  isActive: { type: Boolean, default: true },
-  role: { type: mongoose.Schema.Types.ObjectId, ref: 'userRoles', required : [true, 'Please assign role to user!']}
+  isActive: { type: Boolean, default: true }
+  //role: { type: mongoose.Schema.Types.ObjectId, ref: 'userRole', required : [true, 'Please assign role to user!']}
 });
 
 // Before saving the user, hash the password

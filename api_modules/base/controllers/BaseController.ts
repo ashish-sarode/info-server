@@ -23,14 +23,14 @@ abstract class BaseController {
    */
   getAll = async (req, res, next) => {
     try {
-      var pageNo = ((!isNaN(req.body.page) && (parseInt(req.body.page) > 0)) ? parseInt(req.body.page) : 1);
+      const pageNo = ((!isNaN(req.body.page) && (parseInt(req.body.page) > 0)) ? parseInt(req.body.page) : 1);
       this.size = parseInt(req.body.limit) || this.size;
-      var filters = { skip: this.size * (pageNo - 1), limit: this.size };
-      var totalRecords: any;
-      totalRecords = await this.model.countDocuments(req.body.searchFilter || {}, function (err, totalCount) {
-        if (err) { return next(err); }
-        return totalCount;
-      });
+      const filters = { skip: this.size * (pageNo - 1), limit: this.size };
+      const { error, recordsFound } = await this.model.countDocuments(req.body.searchFilter || {});
+
+      if (error) { return next(error); }
+      const totalRecords = recordsFound;
+
       this.model.find(req.body.searchFilter || {}, {}, filters, (err, records) => {
         if (err) { return next(err); }
         //console.log(req.decoded.user);
@@ -75,12 +75,12 @@ abstract class BaseController {
         if (err && err.code === 11000) {
           console.log(err);
           data = { errors: { unique: 'Record is already exists' } };
-          return res.status(400).json(this.filterResponse(false, 400, 'Record is already exists.', data));
+          return res.status(200).json(this.filterResponse(false, 200, 'Record is already exists.', data));
         }
         if (err) {
           console.log(err);
           data = (err.name == 'ValidationError') ? mongooseErrorHandler.set(err) : err;
-          return res.status(400).json(this.filterResponse(false, 400, 'Something went wrong.', data));
+          return res.status(200).json(this.filterResponse(false, 200, 'Parameters missing.', data));
         }
         return res.status(200).json(this.filterResponse(true, 200, 'Record inserted successfully!.', item));
       });

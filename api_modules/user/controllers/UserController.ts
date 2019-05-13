@@ -1,5 +1,6 @@
 import BaseController from '../../base/controllers/BaseController';
 import userModel from '../models/UserModel';
+import userRoleModel from '../models/UserRoleModel';
 import Middleware from '../../middleware/middleware'
 import * as jwt from 'jsonwebtoken';
 
@@ -20,7 +21,7 @@ export default class UserController extends BaseController {
      *
      * @memberof UserController
      */
-    login = (req, res, next) => {console.log(req.locale);
+    login = (req, res, next) => {
         try {
             this.model.findOne({ email: req.body.email }, (err, user) => {
                 if (!user) { return res.status(403).json(this.filterResponse(false, 403, 'User not register.', {})); }
@@ -32,6 +33,23 @@ export default class UserController extends BaseController {
                     req.headers['x-access-token'] = this.token;
                     res.status(200).json(this.filterResponse(true, 200, 'Login Success!', { token: this.token, username: user.username, _id: user._id }));
                 });
+            });
+        } catch (ex) {
+            return next(middleware.customErrorHandler(500, ex.name, 'Something went wrong.', ex.message));
+        }
+    }
+
+    /**
+     * Function to validate role and assign to newly creating user
+     *
+     * @memberof UserController
+     */
+    assignRole = (req, res, next) => {
+        try {
+            userRoleModel.findOne({ role: req.body.role }, (err, userRole) => {
+                if (!userRole) { return res.status(403).json(this.filterResponse(false, 403, 'Invalid user role.', {})); }
+               // req.body.role = userRole._id;
+                next()
             });
         } catch (ex) {
             return next(middleware.customErrorHandler(500, ex.name, 'Something went wrong.', ex.message));

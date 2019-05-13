@@ -13,7 +13,7 @@ router.route('/count').get(user.count);
 router.route('/get/:id').get(user.get);
 
 router.route('/').post(middleware.checkToken, user.getAll);
-router.route('/new').post(middleware.checkToken, user.insert);
+router.route('/new').post(user.insert);
 router.route('/put/:id').put(middleware.checkToken, user.update);
 router.route('/user/:id').delete(middleware.checkToken, user.delete);
 
