@@ -14,8 +14,18 @@ const middleware = new Middleware();
  * @extends {BaseController}
  */
 export default class UserController extends BaseController {
-    model = userModel;
     private token: any;
+    model = userModel;
+
+    /**
+     *Creates an instance of UserController.
+     * @memberof UserController
+     */
+    constructor() {
+        super();
+        this.dataPopulation = { path: 'role', match: { isActive: true }, select: 'role -_id' };
+    }
+
     /**
      * Function to authenticate user by user email and password
      *
@@ -48,7 +58,7 @@ export default class UserController extends BaseController {
         try {
             userRoleModel.findOne({ role: req.body.role }, (err, userRole) => {
                 if (!userRole) { return res.status(403).json(this.filterResponse(false, 403, 'Invalid user role.', {})); }
-               // req.body.role = userRole._id;
+                req.body.role = userRole._id;
                 next()
             });
         } catch (ex) {
