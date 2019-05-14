@@ -2,11 +2,11 @@
   "name": "info-server",
   "version": "1.0.0",
   "description": "Rest API developed by ashishS - infobeans",
-  "main": "index.js",
+  "main": "./dist/src/server.js",
   "scripts": {
     "build": "tsc",
     "dev": "ts-node ./src/server.ts",
-    "start": "nodemon ./dist/server.js",
+    "start": "nodemon ./dist/src/server.ts",
     "prod": "npm run build && npm run start",
     "postinstall": "npm link"
   },
@@ -21,8 +21,11 @@
     "string-template": "^1.0.0"
   },
   "dependencies": {
+    "@hapi/joi": "^15.0.3",
     "app-root-path": "^2.2.1",
     "bcrypt": "^3.0.6",
+    "cli-table": "^0.3.1",
+    "cors": "^2.8.5",
     "date-and-time": "^0.6.3",
     "dotenv": "^7.0.0",
     "jsonwebtoken": "^8.5.1",

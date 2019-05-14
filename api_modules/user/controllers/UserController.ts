@@ -1,6 +1,7 @@
 import BaseController from '../../base/controllers/BaseController';
 import userModel from '../models/UserModel';
 import userRoleModel from '../models/UserRoleModel';
+import userSchemaValidation from '../models/UserModelValidation';
 import Middleware from '../../middleware/middleware'
 import * as jwt from 'jsonwebtoken';
 
@@ -16,6 +17,7 @@ const middleware = new Middleware();
 export default class UserController extends BaseController {
     private token: any;
     model = userModel;
+    schemaValidation = userSchemaValidation;
 
     /**
      *Creates an instance of UserController.
@@ -37,7 +39,7 @@ export default class UserController extends BaseController {
                 if (!user) { return res.status(403).json(this.filterResponse(false, 403, 'User not register.', {})); }
                 user.comparePassword(req.body.password, (error, isMatch) => {
                     if (!isMatch) {
-                        return res.status(403).json(this.filterResponse(false, 403, 'Please check your login details.', {}));
+                        return res.status(403).json(this.filterResponse(false, 403, 'Please check your login details.', {errors:{name:'AuthenticationError',message:"Invalid login credentials."}}));
                     }
                     this.token = jwt.sign({ user: user }, process.env.SECRET_TOKEN, { expiresIn: 60 * 60 }); // , { expiresIn: 10 } seconds
                     req.headers['x-access-token'] = this.token;
@@ -65,4 +67,5 @@ export default class UserController extends BaseController {
             return next(middleware.customErrorHandler(500, ex.name, 'Something went wrong.', ex.message));
         }
     }
+
 }

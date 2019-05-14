@@ -1,4 +1,5 @@
 import Middleware from '../../middleware/middleware'
+import * as Joi from '@hapi/joi';
 
 const mongooseErrorHandler = require('mongoose-error-handler');
 const middleware = new Middleware();
@@ -12,6 +13,7 @@ const middleware = new Middleware();
 abstract class BaseController {
 
   abstract model: any;
+  abstract schemaValidation: any;
   public queryObj: any;
   public size = 10;
   public searchFilter = {};
@@ -77,12 +79,9 @@ abstract class BaseController {
         let data;
         // 11000 is the code for duplicate key error
         if (err && err.code === 11000) {
-          console.log(err);
-          data = { errors: { unique: 'Record is already exists' } };
-          return res.status(200).json(this.filterResponse(false, 200, 'Record is already exists.', data));
+          return res.status(200).json(this.filterResponse(false, 200, 'Record is already exists.', { errors: { name: err.name, message: 'Record is already exists' } }));
         }
         if (err) {
-          console.log(err);
           data = (err.name == 'ValidationError') ? mongooseErrorHandler.set(err) : err;
           return res.status(200).json(this.filterResponse(false, 200, 'Parameters missing.', data));
         }
@@ -158,6 +157,19 @@ abstract class BaseController {
   filterResponse = (status: Boolean, statusCode: Number, message: String, data: any) => {
 
     return { status: { isSuccessful: status, code: statusCode, message: message }, data: data };
+  }
+
+  /**
+   *Function to validate model schema
+   *
+   * @memberof BaseController
+   */
+  validateUserData = (req, res, next) => {
+    Joi.validate(req.body, this.schemaValidation, function (err, value) {
+      if (!err) { return next(); }
+      err.details = { "path": err.details[0].context.key, "message": err.details[0].message };
+      return next(err);
+    });
   }
 }
 
