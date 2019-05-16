@@ -1,5 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import * as mongoose from 'mongoose';
+import * as validator from 'validator';
 //import userRoleModel from './UserRoleModel';
 
 const userSchema = new mongoose.Schema({
@@ -7,7 +8,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, lowercase: true, trim: true, required: [true, 'Please enter your email!'] },
   password: { type: String, required: [true, 'Please enter your password!'] },
   isActive: { type: Boolean, default: true },
-  role: { type: mongoose.Schema.Types.ObjectId, ref: 'userRole', required : [true, 'Please assign role to user!']}
+  role: { type: mongoose.Schema.Types.ObjectId, ref: 'userRole', required: [true, 'Please assign role to user!'] }
 });
 
 
@@ -20,6 +21,7 @@ userSchema.path('email').validate(function (email) {
 // Before saving the user, hash the password
 userSchema.pre('save', function (next) {
   const user = this;
+  user.username = validator.escape(user.username);
   if (!user.isModified('password')) { return next(); }
   bcrypt.genSalt(10, function (err, salt) {
     if (err) { return next(err); }

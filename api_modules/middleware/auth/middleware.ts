@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv';
 import * as jwt from 'jsonwebtoken';
+import userModel from '../../user/models/UserModel';
 
 export default class Middleware {
     /**
@@ -9,28 +10,31 @@ export default class Middleware {
      * @param next Callback
      * @memberof Middleware
      */
-    checkToken = (req, res, next) => {
+    checkToken = async (req, res, next) => {
         try {
             var token = req.headers['x-access-token'] || req.headers.authorization; // Express headers are auto converted to lowercase
-            if (token.startsWith('Bearer ')) {
-                token = token.slice(7, token.length);
-            }
+
             if (!token) {
                 return next(this.customErrorHandler(400, 'InvalidParams', 'Bad Request.', 'Auth token is not supplied.'));
             }
-            jwt.verify(token, process.env.SECRET_TOKEN, (err, decoded) => {
-                if (err) {
-                    err.code = 401;
-                    err.info = 'Unauthorized access.';
-                    err.message = 'Token is not valid or expired.'
-                    return next(err);
+            token = (token.startsWith('Bearer ')) ? token.slice(7, token.length) : token;
 
-                } else {
-                    req.decoded = decoded;
-                    next();
-                }
-            });
+            req.decoded = await jwt.verify(token, process.env.SECRET_TOKEN);
+
+            var user = await userModel.findOne({ email: req.decoded.user.email });
+            if (!user.isActive) {
+                return next(this.customErrorHandler(403, 'UserStateError', 'Unauthorized access.', 'You might not be no longer authorized. Please contact administrator.'));
+            }
+            next();
+
         } catch (ex) {
+            console.log(ex);
+            if (ex.name == 'TokenExpiredError' || ex.name == 'JsonWebTokenError') {
+                ex.code = 401;
+                ex.info = 'Unauthorized access.';
+                ex.message = 'Token is not valid or expired.'
+                return next(ex);
+            }
             return next(this.customErrorHandler(500, ex.name, 'Something went wrong.', ex.message));
         }
     }

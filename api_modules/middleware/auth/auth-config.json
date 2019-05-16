@@ -1,0 +1,6 @@
+{
+    "secret": "temp",
+    "refreshTokenSecret": "temp",
+    "tokenLife": 3600,
+    "refreshTokenLife": 86400
+}

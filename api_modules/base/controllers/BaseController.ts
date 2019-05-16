@@ -1,4 +1,4 @@
-import Middleware from '../../middleware/middleware'
+import Middleware from '../../middleware/auth/middleware'
 import * as Joi from '@hapi/joi';
 
 const mongooseErrorHandler = require('mongoose-error-handler');
@@ -13,7 +13,7 @@ const middleware = new Middleware();
 abstract class BaseController {
 
   abstract model: any;
-  abstract schemaValidation: any;
+  public schemaValidation: any;
   public queryObj: any;
   public size = 10;
   public searchFilter = {};
@@ -165,8 +165,9 @@ abstract class BaseController {
    * @memberof BaseController
    */
   validateUserData = (req, res, next) => {
-    Joi.validate(req.body, this.schemaValidation, function (err, value) {
+    Joi.validate(req.body, this.schemaValidation, { escapeHtml: true }, function (err, value) {
       if (!err) { return next(); }
+      err.code = 400;
       err.details = { "path": err.details[0].context.key, "message": err.details[0].message };
       return next(err);
     });

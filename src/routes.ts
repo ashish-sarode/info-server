@@ -1,7 +1,7 @@
 import * as express from 'express';
 import baseRoutes from '../api_modules/base/routes'
 import userRoutes from '../api_modules/user/routes';
-import logger from '../api_modules/middleware/logger'
+import logger from '../api_modules/middleware/logger/logger'
 import * as date from 'date-and-time';
 import * as TableFormatter from 'cli-table';
 const currentDate = date.format(new Date(), 'YYYY-MM-DD HH:mm:ss');
@@ -28,7 +28,7 @@ export default function setRoutes(app) {
            , { 'URL': req.originalUrl }
          );*/
         table.push(
-            [currentDate, `${req.originalUrl} - ${req.ip}`, req.method, err.status || 500, err.message]
+            [currentDate, `${req.originalUrl} - ${req.ip}`, req.method, err.code || err.status || 500, err.message]
         );
 
         console.log(table.toString());

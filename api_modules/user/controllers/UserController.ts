@@ -2,9 +2,10 @@ import BaseController from '../../base/controllers/BaseController';
 import userModel from '../models/UserModel';
 import userRoleModel from '../models/UserRoleModel';
 import userSchemaValidation from '../models/UserModelValidation';
-import Middleware from '../../middleware/middleware'
+import Middleware from '../../middleware/auth/middleware'
 import * as jwt from 'jsonwebtoken';
 
+const authConfig = require('../../middleware/auth/auth-config');
 const middleware = new Middleware();
 
 /**
@@ -16,6 +17,7 @@ const middleware = new Middleware();
  */
 export default class UserController extends BaseController {
     private token: any;
+    private refreshToken: any;
     model = userModel;
     schemaValidation = userSchemaValidation;
 
@@ -35,15 +37,18 @@ export default class UserController extends BaseController {
      */
     login = (req, res, next) => {
         try {
+            authConfig.secret = process.env.SECRET_TOKEN;
+            console.log(authConfig);
             this.model.findOne({ email: req.body.email }, (err, user) => {
                 if (!user) { return res.status(403).json(this.filterResponse(false, 403, 'User not register.', {})); }
                 user.comparePassword(req.body.password, (error, isMatch) => {
                     if (!isMatch) {
-                        return res.status(403).json(this.filterResponse(false, 403, 'Please check your login details.', {errors:{name:'AuthenticationError',message:"Invalid login credentials."}}));
+                        return res.status(403).json(this.filterResponse(false, 403, 'Please check your login details.', { errors: { name: 'AuthenticationError', message: "Invalid login credentials." } }));
                     }
-                    this.token = jwt.sign({ user: user }, process.env.SECRET_TOKEN, { expiresIn: 60 * 60 }); // , { expiresIn: 10 } seconds
+                    this.token = jwt.sign({ user: user }, authConfig.secret, { expiresIn: authConfig.tokenLife }); // , { expiresIn: 10 } seconds
+                    this.refreshToken = jwt.sign({ user: user }, authConfig.secret, { expiresIn: authConfig.refreshTokenLife });
                     req.headers['x-access-token'] = this.token;
-                    res.status(200).json(this.filterResponse(true, 200, 'Login Success!', { token: this.token, username: user.username, _id: user._id }));
+                    res.status(200).json(this.filterResponse(true, 200, 'Login Success!', { tokens: { token: this.token, refreshToken: this.refreshToken }, user: { username: user.username, email: user.email } }));
                 });
             });
         } catch (ex) {

@@ -30,7 +30,9 @@
     "dotenv": "^7.0.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.5.3",
+    "mongoose-data-seed": "^1.0.7",
     "mongoose-error-handler": "^1.0.0",
+    "validator": "^10.11.0",
     "winston": "^3.2.1"
   },
   "bin": {

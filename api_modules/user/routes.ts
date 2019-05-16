@@ -1,6 +1,6 @@
 import * as express from 'express';
 import UserController from './controllers/UserController'
-import Middleware from '../middleware/middleware'
+import Middleware from '../middleware/auth/middleware'
 
 
 const router = express.Router();
@@ -9,6 +9,7 @@ const middleware = new Middleware();
 
 /*User controller routes*/
 router.route('/login').post(user.login);
+router.route('/token').post(user.login);
 router.route('/count').get(user.count);
 router.route('/get/:id').get(user.get);
 
