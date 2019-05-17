@@ -8,13 +8,15 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, lowercase: true, trim: true, required: [true, 'Please enter your email!'] },
   password: { type: String, required: [true, 'Please enter your password!'] },
   isActive: { type: Boolean, default: true },
-  role: { type: mongoose.Schema.Types.ObjectId, ref: 'userRole', required: [true, 'Please assign role to user!'] }
+  role: { type: mongoose.Schema.Types.ObjectId, ref: 'userRole', required: [true, 'Please assign role to user!'] },
+  device: String,
+  deviceId: String,
+  fcmToken: String
 });
 
 
 userSchema.path('email').validate(function (email) {
   var emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
-  console.log(email);
   return emailRegex.test(email);
 }, 'Invalid email given.')
 

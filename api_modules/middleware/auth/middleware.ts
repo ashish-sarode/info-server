@@ -28,7 +28,6 @@ export default class Middleware {
             next();
 
         } catch (ex) {
-            console.log(ex);
             if (ex.name == 'TokenExpiredError' || ex.name == 'JsonWebTokenError') {
                 ex.code = 401;
                 ex.info = 'Unauthorized access.';

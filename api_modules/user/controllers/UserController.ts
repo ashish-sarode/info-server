@@ -38,7 +38,6 @@ export default class UserController extends BaseController {
     login = (req, res, next) => {
         try {
             authConfig.secret = process.env.SECRET_TOKEN;
-            console.log(authConfig);
             this.model.findOne({ email: req.body.email }, (err, user) => {
                 if (!user) { return res.status(403).json(this.filterResponse(false, 403, 'User not register.', {})); }
                 user.comparePassword(req.body.password, (error, isMatch) => {
@@ -69,6 +68,40 @@ export default class UserController extends BaseController {
                 next()
             });
         } catch (ex) {
+            return next(middleware.customErrorHandler(500, ex.name, 'Something went wrong.', ex.message));
+        }
+    }
+
+    /**
+     * Function to authenticate user by user email and password
+     *
+     * @memberof UserController
+     */
+    getToken = async (req, res, next) => {
+        try {
+            authConfig.secret = process.env.SECRET_TOKEN;
+            const userEmail = req.body.email;
+            const refreshToken = (req.body.refreshToken.startsWith('Bearer ')) ? req.body.refreshToken.slice(7, req.body.refreshToken.length) : req.body.refreshToken;
+
+            const decoded = await jwt.verify(refreshToken, process.env.SECRET_TOKEN);
+            req.body = decoded.user;
+            if ((req.body.email != userEmail)) { return res.status(403).json(this.filterResponse(false, 403, 'User not register.', {})); }
+
+            this.model.findOne({ email: req.body.email }, (err, user) => {
+                if (err) { return next(err); }
+                if (!user.isActive) { return next(middleware.customErrorHandler(403, 'UserStateError', 'Unauthorized access.', 'You might not be no longer authorized. Please contact administrator.')); }
+                this.token = jwt.sign({ user: user }, authConfig.secret, { expiresIn: authConfig.tokenLife }); // , { expiresIn: 10 } seconds
+                this.refreshToken = jwt.sign({ user: user }, authConfig.secret, { expiresIn: authConfig.refreshTokenLife });
+                req.headers['x-access-token'] = this.token;
+                res.status(200).json(this.filterResponse(true, 200, 'Token regenerated!', { tokens: { token: this.token, refreshToken: this.refreshToken }, user: { username: user.username, email: user.email } }));
+            });
+        } catch (ex) {
+            if (ex.name == 'TokenExpiredError' || ex.name == 'JsonWebTokenError') {
+                ex.code = 401;
+                ex.info = 'Unauthorized access.';
+                ex.message = 'Token is not valid or expired.'
+                return next(ex);
+            }
             return next(middleware.customErrorHandler(500, ex.name, 'Something went wrong.', ex.message));
         }
     }
