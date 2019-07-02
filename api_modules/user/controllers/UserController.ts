@@ -5,7 +5,7 @@ import userSchemaValidation from '../models/UserModelValidation';
 import Middleware from '../../middleware/auth/middleware'
 import * as jwt from 'jsonwebtoken';
 
-const authConfig = require('../../middleware/auth/auth-config');
+
 const middleware = new Middleware();
 
 /**
@@ -16,10 +16,9 @@ const middleware = new Middleware();
  * @extends {BaseController}
  */
 export default class UserController extends BaseController {
-    private token: any;
-    private refreshToken: any;
     model = userModel;
     schemaValidation = userSchemaValidation;
+    private tokens: any;
 
     /**
      *Creates an instance of UserController.
@@ -37,17 +36,16 @@ export default class UserController extends BaseController {
      */
     login = (req, res, next) => {
         try {
-            authConfig.secret = process.env.SECRET_TOKEN;
+            console.log("hello - login");
             this.model.findOne({ email: req.body.email }, (err, user) => {
                 if (!user) { return res.status(403).json(this.filterResponse(false, 403, 'User not register.', {})); }
                 user.comparePassword(req.body.password, (error, isMatch) => {
                     if (!isMatch) {
                         return res.status(403).json(this.filterResponse(false, 403, 'Please check your login details.', { errors: { name: 'AuthenticationError', message: "Invalid login credentials." } }));
                     }
-                    this.token = jwt.sign({ user: user }, authConfig.secret, { expiresIn: authConfig.tokenLife }); // , { expiresIn: 10 } seconds
-                    this.refreshToken = jwt.sign({ user: user }, authConfig.secret, { expiresIn: authConfig.refreshTokenLife });
-                    req.headers['x-access-token'] = this.token;
-                    res.status(200).json(this.filterResponse(true, 200, 'Login Success!', { tokens: { token: this.token, refreshToken: this.refreshToken }, user: { username: user.username, email: user.email } }));
+                    this.tokens = middleware.signIn(user);
+                    //req.headers['x-access-token'] = tokens.token;
+                    res.status(200).json(this.filterResponse(true, 200, 'Login Success!', { tokens: this.tokens, user: { username: user.username, email: user.email } }));
                 });
             });
         } catch (ex) {
@@ -79,7 +77,6 @@ export default class UserController extends BaseController {
      */
     getToken = async (req, res, next) => {
         try {
-            authConfig.secret = process.env.SECRET_TOKEN;
             const userEmail = req.body.email;
             const refreshToken = (req.body.refreshToken.startsWith('Bearer ')) ? req.body.refreshToken.slice(7, req.body.refreshToken.length) : req.body.refreshToken;
 
@@ -90,10 +87,9 @@ export default class UserController extends BaseController {
             this.model.findOne({ email: req.body.email }, (err, user) => {
                 if (err) { return next(err); }
                 if (!user.isActive) { return next(middleware.customErrorHandler(403, 'UserStateError', 'Unauthorized access.', 'You might not be no longer authorized. Please contact administrator.')); }
-                this.token = jwt.sign({ user: user }, authConfig.secret, { expiresIn: authConfig.tokenLife }); // , { expiresIn: 10 } seconds
-                this.refreshToken = jwt.sign({ user: user }, authConfig.secret, { expiresIn: authConfig.refreshTokenLife });
-                req.headers['x-access-token'] = this.token;
-                res.status(200).json(this.filterResponse(true, 200, 'Token regenerated!', { tokens: { token: this.token, refreshToken: this.refreshToken }, user: { username: user.username, email: user.email } }));
+                this.tokens = middleware.signIn(user);
+                //req.headers['x-access-token'] = this.token;
+                res.status(200).json(this.filterResponse(true, 200, 'Token regenerated!', { tokens: this.tokens, user: { username: user.username, email: user.email } }));
             });
         } catch (ex) {
             if (ex.name == 'TokenExpiredError' || ex.name == 'JsonWebTokenError') {

@@ -5,8 +5,8 @@
   "main": "./dist/src/server.js",
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node ./src/server.ts",
-    "start": "nodemon ./dist/src/server.ts",
+    "dev": "nodemon ./src/server.ts",
+    "start": "ts-node ./dist/src/server.ts",
     "prod": "npm run build && npm run start",
     "postinstall": "npm link"
   },
@@ -17,7 +17,7 @@
     "camelcase": "^5.3.1",
     "concurrently": "^4.1.0",
     "express": "^4.16.4",
-    "nodemon": "^1.18.11",
+    "nodemon": "^1.19.1",
     "string-template": "^1.0.0"
   },
   "dependencies": {
@@ -29,9 +29,11 @@
     "date-and-time": "^0.6.3",
     "dotenv": "^7.0.0",
     "jsonwebtoken": "^8.5.1",
+    "minimist": "^1.2.0",
     "mongoose": "^5.5.3",
     "mongoose-data-seed": "^1.0.7",
     "mongoose-error-handler": "^1.0.0",
+    "opencv4nodejs": "^4.16.0",
     "validator": "^10.11.0",
     "winston": "^3.2.1"
   },

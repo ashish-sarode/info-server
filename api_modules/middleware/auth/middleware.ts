@@ -1,8 +1,23 @@
 import * as dotenv from 'dotenv';
 import * as jwt from 'jsonwebtoken';
 import userModel from '../../user/models/UserModel';
+const authConfig = require('../../middleware/auth/auth-config');
 
 export default class Middleware {
+    private token: any;
+    private refreshToken: any;
+
+    signIn = (user) => {
+        authConfig.secret = process.env.SECRET_TOKEN;
+
+        this.token = jwt.sign({ user: user }, authConfig.secret, { expiresIn: authConfig.tokenLife }); // , { expiresIn: 10 } seconds
+        this.refreshToken = jwt.sign({ user: user }, authConfig.secret, { expiresIn: authConfig.refreshTokenLife });
+
+        return { token: this.token, refreshToken: this.refreshToken };
+    }
+
+
+
     /**
      * Function to validate auth token provided by client
      * @param req Request
