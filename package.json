@@ -30,7 +30,7 @@
     "dotenv": "^7.0.0",
     "jsonwebtoken": "^8.5.1",
     "minimist": "^1.2.0",
-    "mongoose": "^5.5.3",
+    "mongoose": "^5.7.5",
     "mongoose-data-seed": "^1.0.7",
     "mongoose-error-handler": "^1.0.0",
     "opencv4nodejs": "^4.16.0",
