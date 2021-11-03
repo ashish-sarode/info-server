@@ -34,7 +34,7 @@
     "mongoose-data-seed": "^1.0.7",
     "mongoose-error-handler": "^1.0.0",
     "opencv4nodejs": "^4.16.0",
-    "validator": "^10.11.0",
+    "validator": "^13.7.0",
     "winston": "^3.2.1"
   },
   "bin": {
